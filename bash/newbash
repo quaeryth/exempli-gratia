@@ -1,0 +1,6 @@
+#!/bin/bash
+
+bash_dir=$HOME/prog/bash
+new_file_path=$bash_dir/$1
+
+cp $bash_dir/template.sh $new_file_path.bash

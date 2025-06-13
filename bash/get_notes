@@ -1,0 +1,43 @@
+#!/bin/bash
+
+############
+#
+# File: get_notes.bash
+#
+# Goal: grab note file from phone and extract logs
+#
+############
+
+err() {
+  printf "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*\n\n" >&2
+  exit 1
+}
+
+mess() {
+    printf "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $*\n"
+}
+
+if [[ ! -d '/run/user/1001/gvfs/mtp:host=ZTE_Z5157V_320416658028/disk' ]]; then
+    err "Phone not connected/accessible"
+else mess "Phone found..."
+fi
+
+cd '/run/user/1001/gvfs/mtp:host=ZTE_Z5157V_320416658028/disk/Notes' || err "Couldn't cd to sunflower's Notes directory"
+jsonFile=$(ls -t | grep -E -e '20[[:digit:]]{6}\.json' | head -n 1)
+
+if [[ -z $jsonFile ]]; then
+    mess "No date-based json files to work on"
+    exit 0
+else mess "Using $jsonFile..."
+fi
+
+mess "Perling it up..."
+perl ~/bin/notes_to_logs.pl.link "$PWD/$jsonFile" || err "Didn't perl it up"
+
+mess "Copying the file locally..."
+cp -u "$jsonFile" ~/log/sources || err "Didn't copy jsonFile to sources on laptop"
+
+mess "Moving the file to old_notes..."
+mv -u "$jsonFile" old_notes || err "Didn't move jsonFile to old_notes on phone"
+
+mess "...done!\n"

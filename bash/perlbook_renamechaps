@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for file in `ls 3145_*`
+do
+	name="`echo $file | sed -n 's/3145_//p'`"
+	echo "Renaming $file to $name"
+	mv $file $name
+done

@@ -1,0 +1,76 @@
+Option Explicit
+
+private sub SheetChange(ByVal rChgCells as Object)
+    
+    ' If more than a single cell was changed,
+    '  or if it isn't in the site column, bug out
+    if NOT (rChgCells.supportsService("com.sun.star.sheet.SheetCell")) then exit sub
+    if NOT (rChgCells.CellAddress.Column = 3) then exit sub
+    if NOT (rChgCells.String > "") then exit sub
+
+    dim oDoc as Object
+    dim oSheet as Object      
+    dim oAddress as Object
+
+    dim sEditDate as String
+    dim sEditDay as String
+    dim sEditTime as String
+    
+
+    oDoc = ThisComponent
+    oAddress  = rChgCells.CellAddress
+    oSheet = oDoc.Sheets(oAddress.Sheet)
+    
+    ' If the Date, DoW, or Time cells are populated, don't do anything
+    if AreAutofillsEmpty(oSheet, oAddress.Row) then exit sub
+    
+    sEditDate = Format(Date(), "YYYY-MM-DD")
+    sEditDay  = DayOfWeek()
+    sEditTime = Format(Time(), "HH:MM:SS")
+    
+    WriteToCell(oAddress.Sheet, 0, oAddress.Row, sEditDate)
+    WriteToCell(oAddress.Sheet, 1, oAddress.Row, sEditDay)
+    WriteToCell(oAddress.Sheet, 2, oAddress.Row, sEditTime)
+
+end sub
+
+
+function AreAutofillsEmpty(ByVal oSheetToCheck, ByVal iRowNum)
+
+    dim oAutofillCells as Object
+    dim oQueryResult as Object
+
+    oAutofillCells = oSheetToCheck.getCellRangeByPosition(0, iRowNum, 2, iRowNum)        
+    oQueryResult = oAutofillCells.queryEmptyCells()
+    AreAutofillsEmpty = (UBound(oQueryResult.ColumnDescriptions) < 2)
+
+end function
+
+
+function DayOfWeek()
+
+    dim Day as string
+    select case WeekDay(Now())
+        Case 1: Day = "Sunday"
+        Case 2: Day = "Monday"
+        Case 3: Day = "Tuesday"
+        Case 4: Day = "Wednesday"
+        Case 5: Day = "Thursday"
+        Case 6: Day = "Friday"
+        Case 7: Day = "Saturday"
+    end select
+    DayOfWeek = Day
+
+end function
+
+
+sub WriteToCell(ByVal iSheetNum as Integer, ByVal iRowNum as Integer, ByVal iColNum as Integer, ByVal sValue as string)
+
+    Dim Sheet As Object
+    Dim Cell As Object
+
+    Sheet = ThisComponent.Sheets(iSheetNum)
+    Cell = Sheet.getCellByPosition(iRowNum, iColNum)
+    Cell.String = sValue
+    
+end sub

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for link in `cat chaps.txt`
+do
+	echo "Getting $link..."
+	wget https://blob.perl.org/books/beginning-perl/$link
+	name=`echo $link | sed -n 's/3145_//p'`
+	echo "Renaming $link to $name..."
+	mv -n $link $name
+done

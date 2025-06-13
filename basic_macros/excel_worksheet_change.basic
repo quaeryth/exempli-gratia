@@ -1,0 +1,32 @@
+Private Sub Worksheet_Change(ByVal Target As Range)
+
+' We don't want to proceed with the subroutine...
+'
+'
+' ...if we didn't add text to a single cell in column D,
+If Target.Count <> 1 _
+    Or Application.Intersect(Range("D:D"), Range(Target.Address)) Is Nothing _
+    Or IsEmpty(Target) Then
+        Exit Sub
+End If
+
+'
+' ...or if the first three cells of the row aren't empty
+If Not WorksheetFunction.CountA(Range(Target.Offset(0, -3), Target.Offset(0, -1))) = 0 Then
+    Exit Sub
+End If
+
+Target.Offset(0, -3).NumberFormat = "yyyy-mm-dd"
+Target.Offset(0, -3).FormulaR1C1 = Date
+
+Target.Offset(0, -2).NumberFormat = "dddd"
+Target.Offset(0, -2).FormulaR1C1 = Date
+
+Target.Offset(0, -1).NumberFormat = "hh:mm:ss"
+Target.Offset(0, -1).FormulaR1C1 = Time
+
+
+
+' MsgBox ("Passed!")
+
+End Sub
